@@ -1,0 +1,93 @@
+---
+title: "Generate data"
+author: "Trouble"
+date: "01/12/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+rm(list = ls()) # Probably should remove after testing.
+
+library(tidyverse)
+
+```
+
+# Create parameter combinations
+
+```{r }
+# Set parameters.
+trials <- 10 # Set low for testing.
+n <- c(15, 60, 100) # Sample sizes.
+arm_adj <- c(0, 0.1) # No difference some difference.
+# Could build the arm adjustment into the distributions list, if
+# future Charles wants to fine-tune the difference by density.
+
+
+rdists <- list(list(rdist = "norm",
+                  rpars = list(mean = 50, sd = 17)),
+             list(rdist = "lnorm",
+                  rpars = list(meanlog = 4, meansd = 0.3)))
+
+# Combine parameters with cross.
+sim_par <- cross(list(dist = rdists,
+                      n = n,
+                      arm_adj = arm_adj,
+                      trial = seq(1, trials)))
+
+# Take a look.
+sim_par %>% listviewer::jsonedit()
+
+# Write to package datasets.
+devtools::use_data(sim_par, overwrite = TRUE)
+devtools::use_data(rdists, overwrite = TRUE)
+```
+
+```{r}
+# Convert to a tibble.
+sim_data <- sim_par %>% {
+  tibble(
+    rdist = map_chr(., c("dist", "rdist")),
+    rpars = map(., c("dist", "rpars")),
+    n = map_dbl(., "n"),
+    arm_adj = map_dbl(., "arm_adj"),
+    trial = map_dbl(., "trial")
+  )
+} %>% 
+  mutate(
+    rpar_1 = map_dbl(rpars, 1),
+    rpar_2 = map(rpars, 2),
+    sim_id = paste(
+      rdist,
+      "n",
+      n,
+      "adj",
+      arm_adj,
+      "trial",
+      trial,
+      "par1",
+      rpar_1,
+      "par2",
+      rpar_2,
+      sep = "|"
+    )
+  )
+
+sim_data %>% head()
+```
+
+```{r}
+# Convert this to a test. This is a more complex thing. I want to check that the the grouped tally is the same as the product of the cardinalities of simulation parameters.
+
+sim_data %>% 
+  count(n, rdist, rpar_1, as.character(rpar_2), arm_adj) %>% 
+  filter(nn != trials) %>% nrow() == 0L
+```
+
+# Write simulation data to package
+
+```{r}
+devtools::use_data(sim_data, overwrite = TRUE)
+```
+

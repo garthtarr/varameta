@@ -1,0 +1,72 @@
+---
+title: "Replication of Hozo et al.'s Results"
+author: "Charles T. Gray"
+date: "`r dontpanic::title_date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+
+library(varameta)
+library(tidyverse)
+```
+
+# Tasks
+
+- Find the hozo replication pdfs and include them. 
+- Identify all simulation results as presented by Hozo. 
+    - 200 random samples
+    - sample sizes 8 to 100
+    - $~N(\mu = 50, \sigma^2 = 17^2)$
+    - $~LN(\mu = 4, \sigma = 0.3)$
+    - $~beta(a = 9, b = 4)$
+    - $~\exp(\lambda = 10)$
+    - $~Weibull(a = 2, b = 35)$
+    - plotted average relative error vs sample size
+- What distributions? Build them into the data generation file. 
+- Write hozo parameters to data for package? 
+
+```{r}
+# Take a look at the distributions.
+
+rdists %>% {
+  tibble(
+    distribution = map_chr(., "rdist"),
+    par_1 = map_dbl(., c(2, 1)),
+    par_2 = map(., c(2, 2))
+  )
+} %>% knitr::kable()
+
+```
+
+# Simulate data
+
+```{r}
+# Hozo pars.
+hozo_pars <- cross(list(
+  rdists = rdists,
+  sample_sizes = seq(8, 100, by = 2),
+  trial = c(1:200)
+))
+
+# Convert to a tibble.
+hozo_sim <- hozo_pars %>% {
+  tibble( # Using numbers for testing.
+    # rdist = map_chr(., c(1, 1)),
+    # n = map_int(., 2),
+    trial = map_int(., "trial")
+  )
+}
+
+hozo_sim %>% head()
+
+```
+
