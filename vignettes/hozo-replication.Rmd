@@ -31,11 +31,15 @@ library(tidyverse)
     - $~\exp(\lambda = 10)$
     - $~Weibull(a = 2, b = 35)$
     - plotted average relative error vs sample size
-- What distributions? Build them into the data generation file. 
-- Write hozo parameters to data for package? 
+    - mean: formulas (4) and (5)
+    - variance: formula (16) and range/4, range/6.
+- *What distributions? Build them into the data generation file. (Testing on smaller set, on hold.)*
+- ~~Write hozo parameters to data for package?~~
 
-```{r}
-# Take a look at the distributions.
+
+# Take a look at the distributions to simulate over.
+
+```{r See distributions}
 
 rdists %>% {
   tibble(
@@ -49,24 +53,31 @@ rdists %>% {
 
 # Simulate data
 
+```{r Set trials}
+trials <- 10 # Set low for testing.
+
+```
+
+
 ```{r}
 # Hozo pars.
 hozo_pars <- cross(list(
   rdists = rdists,
   n = seq(8, 100, by = 2),
-  trial = c(1:200)
+  trial = c(1:trials)
 ))
 
 # Convert to a tibble.
 hozo_sim <- hozo_pars %>% {
   tibble( # Using numbers for testing.
     rdist = map_chr(., c("rdists", "rdist")),
+    rpars = map(., c("rdists", "rpars")),
     n = map_dbl(., "n"),
     trial = map_int(., "trial")
   )
 }
 
-hozo_sim %>% head()
+hozo_sim %>% head() %>% knitr::kable()
 
 ```
 
@@ -74,6 +85,23 @@ hozo_sim %>% head()
 # Tally to check we have the correct number of things.
 hozo_sim %>% 
   count(rdist, n) %>% 
-  filter(nn != 200)
+  filter(nn != trials) %>% 
+  nrow() == 0L # Perhaps add this to testing?
+```
+
+## Generate samples 
+
+```{r Samples}
+hozo_sim <- hozo_sim %>% 
+  mutate(ss = pmap(list(n, rdist, rpars), dontpanic::sample_summary),
+         summary = map(ss, "summary"),
+         sample = map(ss, "sample"))
+
+```
+
+# Calculate estimators
+
+```{r Estimators}
+
 ```
 

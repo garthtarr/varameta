@@ -1,0 +1,26 @@
+---
+title: "Guide to the Replications in `varameta`"
+author: "Charles T. Gray"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Formulae
+
+Unfortunately, the latex is a bit too heavyduty for a table in markdown. So, eventually I'll reference my paper.
+
+Anyway, guide to the equations. 
+
+Estimator | Hozo | Bland | Wan 
+-|-|-|-
