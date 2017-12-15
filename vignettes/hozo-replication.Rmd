@@ -53,20 +53,27 @@ rdists %>% {
 # Hozo pars.
 hozo_pars <- cross(list(
   rdists = rdists,
-  sample_sizes = seq(8, 100, by = 2),
+  n = seq(8, 100, by = 2),
   trial = c(1:200)
 ))
 
 # Convert to a tibble.
 hozo_sim <- hozo_pars %>% {
   tibble( # Using numbers for testing.
-    # rdist = map_chr(., c(1, 1)),
-    # n = map_int(., 2),
+    rdist = map_chr(., c("rdists", "rdist")),
+    n = map_dbl(., "n"),
     trial = map_int(., "trial")
   )
 }
 
 hozo_sim %>% head()
 
+```
+
+```{r}
+# Tally to check we have the correct number of things.
+hozo_sim %>% 
+  count(rdist, n) %>% 
+  filter(nn != 200)
 ```
 

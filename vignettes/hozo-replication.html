@@ -17,6 +17,44 @@
 
 
 
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
 
 
 
@@ -31,7 +69,7 @@
 
 <h1 class="title toc-ignore">Replication of Hozo et al.’s Results</h1>
 <h4 class="author"><em>Charles T. Gray</em></h4>
-<h4 class="date"><em>Sunday 3 December 2017</em></h4>
+<h4 class="date"><em>Thursday 7 December 2017</em></h4>
 
 
 
@@ -51,7 +89,67 @@
 <li>plotted average relative error vs sample size</li>
 </ul></li>
 <li>What distributions? Build them into the data generation file.</li>
+<li>Write hozo parameters to data for package?</li>
 </ul>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Take a look at the distributions.</span>
+
+rdists <span class="op">%&gt;%</span><span class="st"> </span>{
+  <span class="kw">tibble</span>(
+    <span class="dt">distribution =</span> <span class="kw">map_chr</span>(., <span class="st">&quot;rdist&quot;</span>),
+    <span class="dt">par_1 =</span> <span class="kw">map_dbl</span>(., <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">1</span>)),
+    <span class="dt">par_2 =</span> <span class="kw">map</span>(., <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))
+  )
+} <span class="op">%&gt;%</span><span class="st"> </span>knitr<span class="op">::</span><span class="kw">kable</span>()</code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="left">distribution</th>
+<th align="right">par_1</th>
+<th align="left">par_2</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">norm</td>
+<td align="right">50</td>
+<td align="left">17</td>
+</tr>
+<tr class="even">
+<td align="left">lnorm</td>
+<td align="right">4</td>
+<td align="left">0.3</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="simulate-data" class="section level1">
+<h1>Simulate data</h1>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Hozo pars.</span>
+hozo_pars &lt;-<span class="st"> </span><span class="kw">cross</span>(<span class="kw">list</span>(
+  <span class="dt">rdists =</span> rdists,
+  <span class="dt">sample_sizes =</span> <span class="kw">seq</span>(<span class="dv">8</span>, <span class="dv">100</span>, <span class="dt">by =</span> <span class="dv">2</span>),
+  <span class="dt">trial =</span> <span class="kw">c</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">200</span>)
+))
+
+<span class="co"># Convert to a tibble.</span>
+hozo_sim &lt;-<span class="st"> </span>hozo_pars <span class="op">%&gt;%</span><span class="st"> </span>{
+  <span class="kw">tibble</span>( <span class="co"># Using numbers for testing.</span>
+    <span class="co"># rdist = map_chr(., c(1, 1)),</span>
+    <span class="co"># n = map_int(., 2),</span>
+    <span class="dt">trial =</span> <span class="kw">map_int</span>(., <span class="st">&quot;trial&quot;</span>)
+  )
+}
+
+hozo_sim <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">head</span>()
+<span class="co">#&gt; # A tibble: 6 x 1</span>
+<span class="co">#&gt;   trial</span>
+<span class="co">#&gt;   &lt;int&gt;</span>
+<span class="co">#&gt; 1     1</span>
+<span class="co">#&gt; 2     1</span>
+<span class="co">#&gt; 3     1</span>
+<span class="co">#&gt; 4     1</span>
+<span class="co">#&gt; 5     1</span>
+<span class="co">#&gt; 6     1</span></code></pre></div>
 </div>
 
 
