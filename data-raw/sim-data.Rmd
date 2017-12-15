@@ -85,6 +85,22 @@ sim_data %>%
   filter(nn != trials) %>% nrow() == 0L
 ```
 
+# Generate samples
+
+# Calculate summary statistics
+
+```{r Generate sample}
+test <- sim_data %>% 
+  mutate(ss = pmap(list(n, rdist, rpars), dontpanic::sample_summary),
+         sample = map(ss, 1),
+         summary = map(ss, 2),
+         summary = map(ss, as.data.frame)
+         )
+
+
+```
+
+
 # Write simulation data to package
 
 ```{r}
